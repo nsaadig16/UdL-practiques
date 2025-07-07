@@ -1,6 +1,6 @@
 # Pràctiques i codi d'assignatures de la UdL.
-
-├── 1r
+```
+├── 1r\n
 │   └── programacio-II
 │       ├── P1-integraltypes
 │       ├── P2-checkers
@@ -21,3 +21,4 @@
     │   └── P1-Autòmat
     └── sistemes_operatius
         └── P1-Pipes_senyals
+```
