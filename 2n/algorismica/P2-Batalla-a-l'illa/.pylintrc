@@ -1,0 +1,12 @@
+[MASTER]
+# Specify a score threshold to be exceeded before program exits with error.
+fail-under=8.0
+
+[MESSAGES CONTROL]
+# Disable specific messages or categories
+disable=
+    C0303  # Trailing whitespace
+
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=120

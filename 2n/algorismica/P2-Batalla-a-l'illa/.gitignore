@@ -1,0 +1,9 @@
+**/.venv
+**/__pycache__
+**/exemples
+**/solucions
+**/output.*
+**/batalla
+**/*.hi
+**/*.o
+**/time.png
