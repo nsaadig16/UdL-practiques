@@ -1,0 +1,385 @@
+; ---------------------------------------------------------------
+; Nom alumne: Naïm Saadi Gallego
+; Grup: PraLab3
+; Sessió: PR-PRA2
+; ---------------------------------------------------------------
+PANTALLA EQU 0F000h
+TECLAT EQU 0E000h
+letter EQU 0F059h ;pos(5,12)
+number EQU 0F068h ;pos(6,12)
+inici_tauler EQU 0F013h
+mapa EQU 0010h
+intents_desenes EQU 0F057h
+intents_unitats EQU 0F058H
+ORIGEN 0010h
+
+INICIO ini 
+
+.DATOS
+	
+	fila_a VALOR 1,1,1,0,0,0
+	fila_b VALOR 0,0,0,0,0,1
+	fila_c VALOR 1,0,1,1,0,0
+	fila_d VALOR 1,0,0,0,0,0
+	fila_e VALOR 0,0,0,0,0,1
+	fila_f VALOR 0,0,0,1,0,0 
+	
+	ini_text VALOR 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh
+	ini_text2 VALOR 282Fh, 282Fh, 2820h, 2820h, 2845h, 2853h, 2846h, 284Fh, 284Eh, 2853h, 2841h, 2820h, 2820h, 282Fh, 282Fh
+	ini_text3 VALOR 282Fh, 282Fh, 2820h, 284Ch, 2841h, 2820h, 2820h, 2846h, 284Ch, 284Fh, 2854h, 2841h, 2820h, 282Fh, 282Fh
+	ini_text4 VALOR 282Fh, 282Fh, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 282Fh, 282Fh
+	ini_text5 VALOR 282Fh, 282Fh, 2820h, 2850h, 2852h, 2845h, 284Dh, 2820h, 284Ch, 2841h, 2820h, 2850h, 2820h, 282Fh, 282Fh
+	ini_text6 VALOR 282Fh, 282Fh, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 282Fh, 282Fh
+	ini_text7 VALOR 282Fh, 282Fh, 284Eh, 2841h, 2849h, 284Dh, 2820h, 2820h, 2853h, 2841h, 2841h, 2844h, 2849h, 282Fh, 282Fh
+	ini_text8 VALOR 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh
+	
+	;ini_text:
+	;///////////////
+	;//  ESFONSA  //
+	;// LA  FLOTA //
+	;// PREM LA P //
+	;//           //
+	;//NAIM  SAADI//
+	;///////////////
+	
+	tauler VALOR 002Dh, 002Dh, 002Dh, 002Dh, 0731h, 0732h, 0733h, 0734h, 0735h, 0736h, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh
+    tauler2 VALOR 002Dh, 002Dh, 002Dh, 0761h, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh
+    tauler3 VALOR 002Dh, 002Dh, 002Dh, 0762h, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh
+    tauler4 VALOR 002Dh, 002Dh, 002Dh, 0763h, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh
+    tauler5 VALOR 002Dh, 002Dh, 002Dh, 0764h, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh
+    tauler6 VALOR 002Dh, 002Dh, 002Dh, 0765h, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 002Dh, 002Dh, 074Ch, 073Dh, 002Dh
+    tauler7 VALOR 002Dh, 002Dh, 002Dh, 0766h, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 092Dh, 3F2Dh, 002Dh, 002Dh, 074Eh, 073Dh, 002Dh
+    tauler8 VALOR 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh, 002Dh
+
+	;tauler:
+	;----123456-----
+	;---a-----------
+	;---b-----------
+	;---c-----------
+	;---d-----------
+	;---e--------L=-
+	;---f--------N=-
+	
+	;Són guions per a no deixar-ho només en espais
+
+	end_text VALOR 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh
+	end_text2 VALOR 282Fh, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 282Fh
+	end_text3 VALOR 282Fh, 2820h, 2856h, 2841h, 2849h, 2858h, 2845h, 284Ch, 284Ch, 2853h, 2820h, 2820h, 2820h, 2820h, 282Fh
+	end_text4 VALOR 282Fh, 2820h, 2820h, 2820h, 2844h, 2845h, 2852h, 2852h, 2849h, 2842h, 2841h, 2854h, 2853h, 2820h, 282Fh
+	end_text5 VALOR 282Fh, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 282Fh
+	end_text6 VALOR 282Fh, 2849h, 284Eh, 2854h, 2845h, 284Eh, 2854h, 2853h, 2820h, 283Dh, 283Dh, 2820h, 283Fh, 283Fh, 282Fh
+	end_text7 VALOR 282Fh, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 2820h, 282Fh
+	end_text8 VALOR 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh, 282Fh
+	
+	;end_text:
+	;///////////////
+	;/             /
+	;/ VAIXELLS    /
+	;/   DERRIBATS /
+	;/             /
+	;/INTENTS == ??/
+	;/             /
+	;///////////////
+	
+	lletres_files VALOR 1461h, 2362h, 2163h, 1664h, 0C65h, 1766h
+	num_files VALOR 0031h, 0132h, 0233h, 0334h, 0435h, 0536h
+	
+.CODIGO
+
+ini:
+
+;//////////////////////////////////////////////////////////////////////////////////////////
+;//////////////////////////////// programa principal //////////////////////////////////////
+;//////////////////////////////////////////////////////////////////////////////////////////
+	
+	MOVH R6, BYTEALTO DIRECCION ini_text
+	MOVL R6, BYTEBAJO DIRECCION ini_text 
+	CALL print_R6							;fiquem la pantalla d'inici a R6 i l'imprimim
+	
+	wait_for_P:
+		CALL wait_for_key					; esperem tecla
+		MOVH R0, BYTEALTO TECLAT
+		MOVL R0, BYTEBAJO TECLAT
+		MOV R1,[R0]							;llegim la primera tecla del buffer
+		MOVH R2, 13h
+		MOVL R2, 50h
+		COMP R1,R2							;comparem si és la lletra P
+	BRNZ wait_for_P							;seguim fent el bucle mentres no sigui la P
+		
+	MOVH R6, BYTEALTO DIRECCION tauler	
+	MOVL R6, BYTEBAJO DIRECCION tauler	;fiquem el tauler a R6 i l'imprimim
+	CALL print_R6
+
+	CALL play								;començem a jugar
+	
+	MOVH R6, BYTEALTO DIRECCION end_text
+	MOVL R6, BYTEBAJO DIRECCION end_text	;fiquem la pantalla de fi a R6 i l'imprimim
+	CALL print_R6
+	
+	CALL show_intents						;mostrem els intents
+	
+	MOVH R0, BYTEALTO DIRECCION fi
+	MOVL R0, BYTEBAJO DIRECCION fi
+	JMP R0
+	
+;//////////////////////////////////////////////////////////////////////////////////////////
+;//////////////////////////// fi programa principal  //////////////////////////////////////
+;//////////////////////////////////////////////////////////////////////////////////////////
+	
+	show_intents:
+		MOVH R0, 00h
+		MOVL R0, '0'						;agafem el caràcter '0'
+		MOVH R5, 00101000b 					;al comptador de desenes hi fiquem fons cià amb lletra negra
+		MOVH R2, 00101000b 					;el mateix amb les unitats
+		ADD R5, R5, R0						
+		ADD R2, R2, R0						; hi afegim el caràcter '0' per a transformar els nombres en caràcters
+		MOVH R0, BYTEALTO intents_desenes
+		MOVL R0, BYTEBAJO intents_desenes	
+		MOV [R0], R5						;mostrem els intents (desenes)
+		MOVH R0, BYTEALTO intents_unitats
+		MOVL R0, BYTEBAJO intents_unitats	;mostrem els intents (unitats)
+		MOV [R0], R2
+	RET
+	
+	print_R6:
+		CALL erase_screen
+		CALL erase_buffer
+		PUSH R0
+		PUSH R1
+		PUSH R2
+		PUSH R3
+
+		MOVH R0, BYTEALTO PANTALLA
+		MOVL R0, BYTEBAJO PANTALLA	;a R0 fiquem la direcció de la pantalla
+		MOV R2, R0
+		MOVL R2, 120				;a R2 fiquem l'adreça 120 després de la pantalla
+		
+		print_row:
+			MOV R3, [R6]
+			MOV [R0], R3			;movem el caràcter del vector a la pantalla
+			INC R0					;passem al següent pixel de pantalla
+			INC R6					;passem al següent caràcter del vector
+			COMP R0,R2				;comparem si el següent pixel ja està fora de la pantalla
+		BRNZ print_row				;si no ho està, seguim
+
+		POP R3
+		POP R2
+		POP R1
+		POP R0
+	RET
+	
+	wait_for_key:
+		PUSH R0
+		PUSH R1
+		PUSH R2
+		no_key:
+			MOVH R0, BYTEALTO TECLAT
+			MOVL R0, BYTEBAJO TECLAT
+			INC R0						;movem a R0 l'adreça de control
+			MOV R2, [R0]
+			MOV R1, [R0]
+			MOVH R1, 00000001b			;col·loquem a R1 la màscara per comprovar si hi ha alguna tecla al buffer
+			COMP R1,R2					;comparem i si no hi ha tecla, repetim el bucle
+		BRNZ no_key						
+		POP R2
+		POP R1
+		POP R0
+		
+	RET
+	
+	wait_for_R1:
+		PUSH R2
+		PUSH R3
+		PUSH R6
+		not_valid:
+			MOV R6, R1						;movem a R6 el vector amb els caràcters pels que podem esperar
+			CALL wait_for_key				;esperem una tecla
+				MOVH R0, BYTEALTO TECLAT
+				MOVL R0, BYTEBAJO TECLAT	
+				MOV R5, [R0]				;movem a R5 el contingut del teclat
+				MOVH R2, 00h
+				MOVL R2, 06h				;iniciem el comptador 
+				next_row:
+					MOV R3, [R6]
+					COMP R3, R5				;comparem si la tecla és igual al caràcter de R1
+					BRZ ok_row				;si ho és, sortim del bucle i tindrem a R5 el caràcter
+					INC R6					;passem al següent caràcter del vector
+					DEC R2					;decrementem el comptador
+				BRNZ next_row				;fins que no acabem el vector repetim
+		JMP not_valid						;si hem acabat el vector i no ha sortit del bucle, el caràcter no es vàlid, esperem a un nou
+		ok_row:
+		POP R6
+		POP R3
+		POP R2
+	RET
+	
+	erase_screen:
+		PUSH R0
+		PUSH R1
+		MOVH R0, BYTEALTO PANTALLA
+		MOVL R0, BYTEBAJO PANTALLA	;guardem la direcció de la pantalla a R0
+		MOVL R0, 78h				;ens desplaçem a l'adreça de control (F078h) (120 = 78h)
+		MOVH R1, 00h				
+		MOVL R1, 00000011b			
+		MOV [R0], R1				; encenem la pantalla i la buidem
+		POP R1
+		POP R0
+		
+	RET
+	
+	erase_buffer:
+		PUSH R0
+		PUSH R1
+
+        MOVH R0, BYTEALTO TECLAT
+		MOVL R0, BYTEBAJO TECLAT	;fiquem a R0 la direcció del TECLAT
+		INC R0						;canviem a l'adreça de control (sumant 1)
+		MOVH R1, 00h
+		MOVL R1, 00000100b			;guardem a R1 la configuració "borrar tot el buffer"
+		MOV [R0],R1					;apliquem la configuració
+
+		POP R1
+		POP R0
+	RET
+
+	play:
+		XOR R6, R6, R6
+		XOR R5, R5, R5
+		XOR R2, R2, R2
+		no_acaba:
+			CALL wait_for_coordinates	;esperem les coordenades
+			;a R3 tindrem la lletra					
+			;a R4 tindrem el nombre
+			;---------
+			CALL comptador_intents		;comptem un intent
+			MOVH R0, 00h
+			MOVL R0, 'a'
+			MOVH R3, 00h
+			SUB R3, R3, R0				;guardem a R3 el valor de la coordenada - 'a' 
+			MOVH R0, 00h
+			MOVL R0, '1'
+			MOVH R4, 00h				
+			SUB R4, R4, R0  			;guardem a R4 el valor de la coordenada - '1' 
+			
+			CALL check_mapa				;comparem amb el mapa
+			
+			MOVH R0, 00h
+			MOVL R0, 0Ah
+			COMP R0, R6					;comparem si els hits (vaixells encertats) són igual al totatl de vaixells, sortim del bucle si es cert
+		BRNZ no_acaba
+	
+	RET
+	
+	wait_for_coordinates:
+		PUSH R5
+			
+		MOVH R1, BYTEALTO DIRECCION lletres_files
+		MOVL R1, BYTEBAJO DIRECCION lletres_files 
+		CALL wait_for_R1								;esperem a que entrin una lletra
+		MOV R3, R5 										;guardem a R3 la lletra
+		MOVH R5, 00000111b 	
+		MOVH R1, BYTEALTO letter
+		MOVL R1, BYTEBAJO letter
+		MOV [R1], R5									; la fiquem a pantalla amb el format corresponent
+		MOVH R1, BYTEALTO DIRECCION num_files
+		MOVL R1, BYTEBAJO DIRECCION num_files 
+		CALL wait_for_R1								;esperem que entri un nombre	
+		MOV R4, R5 										;guardem a R4 el nombre
+		MOVH R5, 00000111b		
+		MOVH R1, BYTEALTO number
+		MOVL R1, BYTEBAJO number
+		MOV [R1], R5									; la fiquem a pantalla amb el format corresponen
+		
+		POP R5
+	RET
+	
+	comptador_intents:
+		;R2 = intents (unitats)
+		;R5 = intents (desenes)
+		INC R2 			;sumem 1 als intents (unitats)
+		MOVH R0, 00h
+		MOVL R0, 0Ah
+		COMP R2, R0		
+	BRNZ menor_que_10	;si els intents son 10, sumem 1 als intents (desenes) i reiniciem les unitats
+		XOR R2, R2, R2
+		INC R5
+	menor_que_10:
+	RET				
+	
+	check_mapa:
+	PUSH R2
+	PUSH R5
+		MOVH R1, 00h
+		MOVL R1, 06h	
+		XOR R0, R0, R0
+		mul1:
+			ADD R0,R0,R3
+			DEC R1		
+		BRNZ mul1				;multipliquem la fila per 6
+		MOVH R2, BYTEALTO mapa
+		MOVL R2, BYTEBAJO mapa	;fiquem a R2 la casella inicial on tenim el mapa amb els vaixells (0010h)
+		ADD R2, R2, R0			; sumem a la casella inicial el nombre de files * 6
+		ADD R2, R2, R4			;hi sumem el nombre de columnes també (així tenim la casella que s'ha seleccionat al mapa)
+		MOV R0, [R2]			;guardem el nombre que hi ha a en aquella casella
+		MOVH R1, 00h
+		MOVL R1, 01h			
+		COMP R0, R1				;comparem si a la casella hi ha un vaixell (indicat amb un 1)
+		BRZ hit					;si n'hi ha, saltem a hit
+		JMP miss				;si no, a miss
+		next_move:
+		CALL erase_lett_num
+	POP R5
+	POP R2
+	RET
+	
+	hit:
+		MOVH R5, 00010010b
+		MOVL R5, 20h						;guardem el color verd a R5
+		CALL pinta_casella_R3_R4_color_R5	;pintem la casella de color verd
+		INC R6 								;contem un encert a R6			
+	JMP next_move							;passem al següent moviment
+	
+	miss:
+		MOVH R5, 00100100b
+		MOVL R5, 20h						;guardem el color vermell a R5
+		CALL pinta_casella_R3_R4_color_R5	;pintem la casella de color vermell
+	JMP next_move							;passem al següent moviment
+	
+	pinta_casella_R3_R4_color_R5:
+		PUSH R2
+		MOVH R1, 00h
+		MOVL R1, 0Fh
+		XOR R0, R0, R0
+		mul2:
+			ADD R0,R0,R3
+			DEC R1
+		BRNZ mul2							;multipliquem la fila per 15
+		MOVH R2, BYTEALTO inici_tauler
+		MOVL R2, BYTEBAJO inici_tauler
+		ADD R2, R2, R0						; sumem a la casella inicial el nombre de files * 6
+		ADD R2, R2, R4						;hi sumem el nombre de columnes també (així tenim la casella de la pantalla que s'ha seleccionat)
+		MOV R0, [R2] 
+		COMP R0, R5 						;comparem per veure si a la casella triada ja s'havia trobat un vaixell
+		BRZ no_count						;si ho era, saltem a no_count
+		JMP skip							;si no, ens ho saltem
+		no_count:	
+			DEC R6							;si ja hi havai un vaixell, descontem un punt (ja que no compta)
+		skip:
+		MOV [R2],R5							;fiquem el color de R5 a la casella de la pantalla
+		POP R2
+	RET
+	
+	erase_lett_num:
+		MOVH R3, BYTEALTO letter
+		MOVL R3, BYTEBAJO letter			; a R3 hi guardem el lloc on apareix la lletra
+		MOVH R4, BYTEALTO number			
+		MOVL R4, BYTEBAJO number			; a R4 hi guardem el lloc on apareix el nombre
+		MOVH R5, 00000000b
+		MOVL R5, 20h						;fiquem una casella buida de color negre
+		MOV [R3], R5						;borrem la lletra
+		MOV [R4], R5						;borrem el nombre
+	RET
+	
+	fi: 
+	JMP -1
+FIN	

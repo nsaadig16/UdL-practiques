@@ -1,0 +1,74 @@
+:Base VonNeumann
+:Title Ayuda de simulador Von Neumann
+1 Introducción
+2 Introducción a los tipos de simulación=introduccion@VonNeumann.hlp
+2 Descripción de la ventana de simulación=descripcion@VonNeumann.hlp
+1 Manejo del simulador
+2 Comenzar
+3 Comenzar una simulación=comenzar@VonNeumann.hlp
+3 Comenzar una simulación nueva=nueva@VonNeumann.hlp
+3 Cargar una simulación existente=cargar@VonNeumann.hlp
+2 Modo "Normal"
+3 Simulación en modo "Normal"=normal@VonNeumann.hlp
+3 Ejecutar instrucciones paso a paso=paso_a_paso@VonNeumann.hlp
+3 Ejecutar instrucciones completas=completa@VonNeumann.hlp
+2 Modo "Manual"
+3 Simulación en modo "Manual"=manual@VonNeumann.hlp
+3 Seleccionar señales de control=seleccionar_señales@VonNeumann.hlp
+3 Errores en la selección de señales=errores_seleccion@VonNeumann.hlp
+3 Generar ciclos de reloj=ciclo_de_reloj_manual@VonNeumann.hlp
+2 Modo "Normal-Run"
+3 Simulación en modo "Normal-Run"=normal_run@VonNeumann.hlp
+2 Guardar simulación
+3 Guardar la simulación en curso=guardar_simulacion@VonNeumann.hlp
+2 Cambiar el contenido de un registro
+3 Cambio manual del contenido de los registros de la CPU=cambio_valor@VonNeumann.hlp
+2 Interrupciones y procedimientos
+3 Interrupciones hardware=interrupciones_hw@VonNeumann.hlp
+3 Interrupciones software=interrupciones_sw@VonNeumann.hlp
+3 Procedimientos=procedimientos@VonNeumann.hlp
+2 Pila
+3 Utilización de la pila=pila@VonNeumann.hlp
+1 Sistema de memoria
+2 Descripción del sistema de memoria=memoria@VonNeumann.hlp
+2 Configuración del sistema de memoria=configurar_memoria@VonNeumann.hlp
+2 Instalación de un módulo de memoria RAM=instalar@VonNeumann.hlp
+2 Desinstalación de un módulo de memoria RAM=desinstalar@VonNeumann.hlp
+2 Editar el contenido de la memoria=memoria_editor@VonNeumann.hlp
+2 Desensamblar el contenido de la memoria=memoria_desensamblador@VonNeumann.hlp
+2 Cargar desde archivo una parte de memoria=memoria_cargar@VonNeumann.hlp
+1 Sistema de entrada/salida
+2 Descripción del sistema de entrada/salida=entrada_salida@VonNeumann.hlp
+2 Conectar periféricos al sistema=conectar@VonNeumann.hlp
+2 Desconectar periféricos=desconectar@VonNeumann.hlp
+2 Tipos de periféricos
+3 Periférico de entrada: "Teclado"=teclado@VonNeumann.hlp
+3 Periférico de salida: "Pantalla"=pantalla@VonNeumann.hlp
+3 Periférico de entrada/salida: "Luces"=luces@VonNeumann.hlp
+1 Archivos ejecutables
+2 Uso de archivos ejecutables=archivos_ejecutables@VonNeumann.hlp
+2 Crear un archivo ejecutable=crear_archivo_ejecutable@VonNeumann.hlp
+2 Cargar un archivo ejecutable=cargar_archivo_ejecutable@VonNeumann.hlp
+1 Macros
+2 Gestión de macros=gestion_macros@VonNeumann.hlp
+2 Crear una macro=crear_macro@VonNeumann.hlp
+2 Modificar una macro=modificar_macro@VonNeumann.hlp
+2 Eliminar una o todas las macros=eliminar_macro@VonNeumann.hlp
+2 Cargar y grabar macros en archivo=cargar_macro@VonNeumann.hlp
+1 Juego de instrucciones
+2 Juego de instrucciones de la CPU=juego_instrucciones@VonNeumann.hlp
+2 Pasos de cada instrucción=pasos_instruccion@VonNeumann.hlp
+1 Señales de control
+2 Señales de control de la CPU=señales_control@VonNeumann.hlp
+1 Referencia de teclas
+2 Referencia de teclas=referencia_teclas@VonNeumann.hlp
+1 Ejemplos
+2 Macros
+3 MOVLL=movll@VonNeumann.hlp
+3 SET=set@VonNeumann.hlp
+2 Programas
+3 SumaNumeros=sumaNumeros@VonNeumann.hlp
+2 Simulaciones
+3 MovimientoLuz=movimientoLuz@VonNeumann.hlp
+3 Pulling=pulling@VonNeumann.hlp
+3 RutinaInterrupcion=rutinaInterrupcion@VonNeumann.hlp
