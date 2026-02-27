@@ -1,0 +1,10 @@
+**/target/
+**/nbproject/
+*~
+*.versionsBackup
+nbactions.xml
+
+# Intellij
+.idea/
+*.iml
+*.iws

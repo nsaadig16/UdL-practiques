@@ -1,0 +1,11 @@
+[project]
+name = "assignment2"
+version = "0.1.0"
+description = "Assignment 2 for the Artificial Intelligence course"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.8",
+    "rich>=14.2.0",
+]

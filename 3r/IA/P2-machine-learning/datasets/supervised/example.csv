@@ -1,0 +1,17 @@
+Referrer,Location,ReadFAQ,Pagesviewed,Service 
+slashdot,USA,yes,18,none 
+google,France,yes,23,Premium
+digg,USA,yes,24,Basic
+kiwitobes,France,yes,23,Basic
+google,UK,no,21,Premium
+(direct),NewZealand,no,12,none
+(direct),UK,no,21,Basic
+google,USA,no,24,Premium
+slashdot,France,yes,19,none
+digg,USA,no,18,none
+google,UK,no,18,none
+kiwitobes,UK,no,19,none
+digg,NewZealand,yes,12,Basic
+slashdot,UK,no,21,none
+google,UK,yes,18,Basic
+kiwitobes,France,yes,19,Basic

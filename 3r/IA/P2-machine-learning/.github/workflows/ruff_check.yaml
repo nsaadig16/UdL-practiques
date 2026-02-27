@@ -1,0 +1,37 @@
+name: Ruff Linter Check
+
+on:
+  push:
+    branches: [ development ]
+  pull_request:
+    branches: [ main, development ]
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12.3'
+
+      - name: Install Ruff
+        run: pip install ruff
+      
+      - name: Run Ruff Check (Fix)
+        run: ruff check . --fix
+
+      - name: Run Ruff Format
+        run: ruff format .
+
+      - name: Commit and Push changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: auto-format with ruff"
+          branch: ${{ github.head_ref || github.ref_name }}

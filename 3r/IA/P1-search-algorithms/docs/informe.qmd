@@ -1,0 +1,466 @@
+---
+title: "First Assignment"
+author:
+  - name: "Naïm Saadi Gallego"
+    email: "nsg9@alumnes.udl.cat"
+  - name: "Eduard Térmens Botanch"
+    email: "etb8@alumnes.udl.cat"
+date: "November 2, 2025"
+lof: true
+toc: true
+indent: true
+fig-pos: H
+callout-appearance: simple
+number-sections: true
+format:
+  pdf:
+    documentclass: article
+    include-in-header:
+      text: |
+        % --- Centered title page with logo ---
+        \usepackage{titling}
+        \makeatletter
+        \renewcommand{\maketitle}{
+          \begin{titlepage}
+            \vspace*{\fill} % centers vertically
+            \begin{center}
+              \includegraphics[width=5cm]{figures/logo.png}\\[1.5cm]
+              \vskip -3em
+              {\LARGE\bfseries \@title \par}
+              \vskip 1em
+              {\large
+                \lineskip .5em
+                \begin{tabular}[t]{c}
+                  \@author
+                \end{tabular}\par}
+              \vskip 1em
+              {\large \@date}
+            \end{center}
+            \vspace*{\fill} % centers vertically
+          \end{titlepage}
+        }
+        \makeatother
+
+        % --- Reduce space above/below section headings ---
+        \usepackage{titlesec}
+        \titlespacing*{\section}{0pt}{0.5em plus .2em minus .2em}{0.3em}
+        \titlespacing*{\subsection}{0pt}{0.3em plus .1em minus .1em}{0.2em}
+
+        % --- Slightly tighter paragraph spacing ---
+        \setlength{\parskip}{0.4em}
+        \setlength{\parindent}{5pt}
+        \usepackage{appendix}
+---
+
+{{< pagebreak >}}
+```{python}
+#| echo: false
+import re
+import warnings
+import os
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+def plot_kiwis(path, title):
+    result = []
+    with open(path) as f:
+        current = {}
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("graph") or line.startswith("tree") or line.startswith("Error"):
+                if current and not current['algorithm'].startswith('Error'):
+                    result.append(current)
+                current = {"algorithm": line,
+                        "Max fringe size": None,
+                        "Solution Cost": None,
+                        "Solution Length": None,
+                        "Search nodes expanded": None}
+            else:
+                match = re.match(r"(.*):\s*(\d+)", line)
+                if match:
+                    key, value = match.groups()
+                    current[key] = int(value)
+        if current and not current['algorithm'].startswith('Error'):
+            result.append(current)
+
+    metrics = ['Max fringe size', 'Solution Cost', 'Solution Length', 'Search nodes expanded']
+    fig, ax = plt.subplots(figsize=(8,4))
+    width = 0.15
+
+    for i, metric in enumerate(metrics):
+        filtered = [(r['algorithm'], r[metric]) for r in result if r[metric] is not None]
+        if not filtered:
+            continue
+        algos, vals = zip(*filtered)
+        x = np.arange(len(algos)) + i*width
+        ax.bar(x, vals, width, label=metric)
+
+    for metric in metrics:
+        filtered = [r['algorithm'] for r in result if r[metric] is not None]
+        if filtered:
+            ax.set_xticks(np.arange(len(filtered)) + width)
+            ax.set_xticklabels(filtered)
+            ax.set_xticklabels(filtered)
+            break
+
+    ax.set_xlabel('Algorithm')
+    ax.set_ylabel('Value')
+    ax.set_title(title)
+    ax.legend()
+    ax.grid(True, linestyle=':', alpha=0.6)
+    plt.tight_layout()
+    plt.show()
+
+    clean_result = [i for i in result if i['Max fringe size'] is not None]
+    df = pd.DataFrame(clean_result)
+    display(df)
+
+def plot_nqueens(path):
+    warnings.simplefilter(action='ignore', category=FutureWarning)
+    records = []
+    with open(path) as f:
+        current = {}
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+
+            # Match both 'graph' and 'tree'
+            if line.startswith(("graph", "tree")):
+                if current:
+                    records.append(current)
+                # Updated regex to capture both graph and tree
+                match = re.match(r"(graph|tree) (\w+) \(seed (\d+) (\d+)\)", line)
+                if match:
+                    search_type, algo, n, seed = match.groups()
+                    current = {"type": f"{search_type} {algo}", "n_queens": int(n), "seed": int(seed)}
+            elif line.startswith("Error:"):
+                # Handle timeout/error cases
+                current["error"] = line
+            else:
+                match = re.match(r"(.*):\s*(\d+)", line)
+                if match:
+                    key, val = match.groups()
+                    current[key] = int(val)
+        if current:
+            records.append(current)
+
+    df = pd.DataFrame(records)
+    
+    # Filter out records with errors for averaging
+    df_valid = df[~df.get('error', pd.Series()).notna()].copy()
+    df_errors = df[df.get('error', pd.Series()).notna()].copy()
+
+    # --- Average across seeds for each (type, n) ---
+    metrics = ['Max fringe size', 'Solution Cost', 'Solution Length', 'Search nodes expanded']
+    
+    # Get all unique combinations of type and n_queens
+    all_combinations = df[['type', 'n_queens']].drop_duplicates()
+    
+    # Calculate averages for valid records
+    grouped = df_valid.groupby(['type', 'n_queens'])[metrics].mean().round().astype(int).reset_index()
+    
+    # Merge with all combinations to get complete table
+    grouped = all_combinations.merge(grouped, on=['type', 'n_queens'], how='left')
+    
+    # Check which combinations had all timeouts
+    if not df_errors.empty:
+        error_counts = df_errors.groupby(['type', 'n_queens']).size().reset_index(name='errors')
+        total_counts = df.groupby(['type', 'n_queens']).size().reset_index(name='total')
+        timeout_info = error_counts.merge(total_counts, on=['type', 'n_queens'])
+        
+        # Mark as timeout where all runs failed
+        for _, row in timeout_info[timeout_info['errors'] == timeout_info['total']].iterrows():
+            mask = (grouped['type'] == row['type']) & (grouped['n_queens'] == row['n_queens'])
+            for metric in metrics:
+                grouped.loc[mask, metric] = 'timeout'
+    
+    # Sort by n_queens and type
+    grouped = grouped.sort_values(['n_queens', 'type']).reset_index(drop=True)
+
+    # --- Plot ---
+    types = sorted(df_valid['type'].unique())
+    metrics = ['Max fringe size', 'Solution Cost', 'Solution Length', 'Search nodes expanded']
+    
+    fig, axes = plt.subplots(2, 2, figsize=(14, 10))
+    axes = axes.flatten()
+    
+    for ax, algo in zip(axes, types):
+        subset = grouped[grouped['type'] == algo].copy()
+        # Remove rows where all metrics are timeouts or missing
+        valid_mask = subset[metrics].applymap(lambda v: isinstance(v, (int, float))).any(axis=1)
+        subset = subset[valid_mask].sort_values('n_queens')
+        
+        if subset.empty:
+            ax.set_title(f"{algo}\n(No valid data)")
+            ax.axis('off')
+            continue
+
+        n_values_algo = subset['n_queens'].tolist()
+        x = np.arange(len(n_values_algo))
+        width = 0.8 / len(metrics)
+        
+        for i, metric in enumerate(metrics):
+            y_values = []
+            for n in n_values_algo:
+                row = subset[subset['n_queens'] == n]
+                if len(row) > 0 and row[metric].values[0] != 'timeout':
+                    try:
+                        y_values.append(int(row[metric].values[0]))
+                    except:
+                        y_values.append(0)
+                else:
+                    y_values.append(0)
+            
+            offset = (i - len(metrics)/2 + 0.5) * width
+            ax.bar(x + offset, y_values, width, label=metric)
+        
+        ax.set_xticks(x)
+        ax.set_xticklabels(n_values_algo)
+        ax.set_xlabel('n (Queens)')
+        ax.set_ylabel('Value (log scale)')
+        ax.set_title(algo)
+        ax.set_yscale('log')
+        ax.grid(True, linestyle=':', alpha=0.6, which='both')
+        ax.legend(fontsize=8)
+
+    plt.tight_layout()
+    plt.show()
+
+    display(grouped)
+
+
+def plot_pacman(log_dir, owner, version, algorithm, heuristic=None):
+    """
+    Reads all log files in a directory assumed to be named {algorithm}_{layout}.lay.log,
+    extracts metrics, and generates a grouped bar chart comparing them.
+
+    Parameters:
+        log_dir (str): Directory containing the .log files.
+        algorithm (str): Algorithm name (e.g. "astar").
+        owner (str): Owner name for the title.
+        heuristic (str | None): Heuristic name (e.g. "manhattan") or None if not used.
+    """
+    results = []
+    pattern = re.compile(rf"{re.escape(owner)}-{version}-{re.escape(algorithm)}_(.+)\.lay\.log$", re.IGNORECASE)
+
+    for filename in os.listdir(log_dir):
+        if filename.startswith("Error"):
+            continue
+        match = pattern.match(filename)
+        if not match:
+            continue
+        layout = match.group(1)
+        path = os.path.join(log_dir, filename)
+
+        data = {
+            "Algorithm": f"{version} {algorithm}",
+            "Heuristic": heuristic if heuristic else "None",
+            "Layout": layout,
+            "Max fringe size": None,
+            "Solution Cost": None,
+            "Solution Length": None,
+            "Search nodes expanded": None
+        }
+        jump = False
+        with open(path) as f:
+            for line in f:
+                if "Error" in line:
+                    jump = True
+                    break
+                match_line = re.match(r"(.*):\s*(\d+)", line.strip())
+                if match_line:
+                    key, value = match_line.groups()
+                    if key in data:
+                        data[key] = int(value)
+        if jump:
+            continue
+        results.append(data)
+
+    if not results:
+        print("No valid log files found in directory.")
+        return
+
+    df = pd.DataFrame(results)
+    df["Config"] = df["Layout"]
+
+    metrics = ['Max fringe size', 'Solution Cost', 'Solution Length', 'Search nodes expanded']
+    grouped = df.groupby("Config").mean(numeric_only=True)
+
+    # --- Plot chart ---
+    fig, ax = plt.subplots(figsize=(8, 4))
+    width = 0.2
+    x = np.arange(len(grouped.index))
+
+    for i, metric in enumerate(metrics):
+        ax.bar(x + i * width, grouped[metric], width, label=metric)
+
+    ax.set_xticks(x + 1.5 * width)
+    ax.set_xticklabels(grouped.index, rotation=90, ha='right')
+    ax.set_xlabel('Layout')
+    ax.set_yscale('log')
+    ax.set_ylabel('Average Value (log scale)')
+    ax.grid(True, linestyle=':', alpha=0.6)
+
+    # Build title dynamically
+    if heuristic:
+        title = f"{owner} - {version} - {algorithm.upper()} - {heuristic}"
+    else:
+        title = f"{owner} - {version} - {algorithm.upper()}"
+
+    ax.set_title(title)
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
+```
+
+# Introduction
+
+In this report, we present the results of different algorithms on the modelled programs and heuristics, alongside data from the implementation of selected algorithms.
+
+# Modelled well-defined problems
+
+## The *kiwis and dogs* problem
+
+In this problem, we defined the action `move()`, which takes an animal and moves it between to vertices connected by an edge.
+It takes the parameters `src` (source vertex), `dst` (destination vertex) and `animal` (whether the animal moved is a `kiwi` or a `dog`).
+
+Then we ran the BFS, DFS and UCS algorithms, in both their tree and graph versions. 
+Since there are cycles, the tree BFS and tree DFS did not end in the time given because they are not complete. The tree UCS also did not end in time because of the high time complexity of the algorithm. That said, it would end at some point since all costs are greater than $\large\varepsilon$.
+
+The graph algorithms' output is represented in @fig-kiwis-1, where we can observe that the BFS and UCS 
+behaved very similarly, with just a bit of difference in the values (see @fig-kiwis-2). In contrast, the DFS algorithm
+expanded less nodes and found a solution with higher cost, since DFS can give a faster and more memory-efficient option ($O(b\cdot m)$) at
+the expense of not being optimal.
+
+## The *n-queens iterative repair* problem
+:::{.callout-note}
+Values represented in @fig-nqueens are the average across all seeds.
+:::
+For the n-queens problem, we defined the `move()` action, which is responsible for moving a queen from one position to another on the board, always staying in the same column (vertical movement only). It takes the parameters `queen` (which of the n queens to move) and `new_pos` (the new position in which to place the queen).
+
+We also implemented a heuristic to solve the problem. Our function calculates the number of conflicts between the queens in that state, considering attacks in ranks and diagonals. Each time it encounters a conflict, it adds 0.5 because a single move can resolve two conflicts simultaneously in the best case. It is weighted by 0.5 to avoid duplicating the penalty. 
+
+Then, we ran UCS and A* algorithms, in both their graph and tree versions, using the previously described heuristic. For the same seed, all algorithms achieve the same solution cost for , confirming their optimality. However, A* clearly outperforms UCS in both time and memory efficiency, especially as n increases. The graph versions are more efficient than the tree ones, since they avoid revisiting states. Among all, graph A* shows the best performance, with a much smaller fringe size and fewer expanded nodes. Tree UCS is the least efficient, quickly growing in complexity for higher values of n. The solution length remains similar across methods, showing that the heuristic improves efficiency without affecting optimality.
+
+In all cases, the A* algorithm showed better performance in both time and space, achieving the same solution cost as UCS but with a significantly smaller maximum fringe size and fewer expanded nodes. This is because the heuristic guides the search toward more promising states, reducing the explored space. However, both algorithms maintain optimality.
+
+As the problem complexity increases (for example, when `n_queens=6` or `n_queens=7`), the performance differences between UCS and A* become more noticeable: the maximum fringe size and number of expanded nodes in A* are between 5 and 15 times smaller, demonstrating its scalable efficiency compared to UCS.
+
+
+# Algorithm implementation
+
+## Implementing A*
+
+For the A* algorithm, we used the UCS algorithm pseudo-code shown in class. We used a priority queue for the fringe, but while implementing the graph version we found out that there was no `replace()` method for it. We came up with the idea of having a dictionary where, for each state, we saved the best ($f(n)$) cost, and when we got to a state with lower cost than the one saved, we saved the new cost. Then, when popping the "old" node (the one that has been replaced), we compare its cost to the state's best $f(n)$ cost
+and if the node popped cost is greater, then we ignore it (since it has been replaced), and we pop the next one. We hasd a bit of complications because we weren't setting the 
+fringe ordering by cost, so it was ordered by state, giving us a wrong answer. We fixed it and then it work exactly like the tool's version
+
+## Implementing IDS
+For the IDS algorithm, we based our implementation on the pseudo-code shown in class. It performs repeated depth-limited searches (DLS), gradually increasing the depth limit until a solution is found. In each iteration, nodes are expanded using a stack (LIFO), which ensures a depth-first behavior, and when the depth limit is reached, the search cuts off and restarts with a higher limit (+1). Since it is a tree search, no visited-state check is performed, so some nodes are re-expanded multiple times. Despite this, IDS is very memory-efficient and guarantees completeness for finite state spaces. However, it is only optimal when all actions have the same cost, as it explores by depth rather than total cost.
+
+# Algorithm performance evaluation
+
+## Implementing heuristics
+
+For the *pacman* problem, we had to implement the Euclidean and Manhattan heuristics, which were quite simple and straightforward. These were the heuristics we used when testing the A* algorithms, as shown on [@fig-pacman-astar-tree; @fig-pacman-astar-graph; @fig-pacman-my-astar-tree; @fig-pacman-my-astar-graph].
+
+## Analysis of the output
+
+We observed that, for all algorithms, the `tinyMaze` and `testMaze` layouts were small and simple enough to be completed within the time limit. If we focus on the graph versions of the algorithms, since they give us more
+information, we can observe that the nodes expanded for the BFS and UCS algorithms (see [@fig-pacman-bfs; @fig-pacman-ucs]) are larger than the A* ones because the latter discards more nodes since they have a higher heuristic value. For the A* heuristics, we can observe that the Manhattan one has higher `max fringe size` values (see [@fig-pacman-astar-graph-2; @fig-pacman-my-astar-graph-2]) while the Euclidean one has more expanded nodes (see [@fig-pacman-astar-graph-1; @fig-pacman-my-astar-graph-1]). We can conclude that since the Manhattan heuristic represents more accurately pacman's movement, it is a more informed heuristic so it prunes more branches, expanding less nodes.
+For the tree IDS (see @fig-pacman-my-ids) we can observe that the max fringe size is much lower than the expanded nodes because it is a **depth search**, so it doesn't add all successors, making the fringe much smaller.
+
+\appendix
+
+# Appendix
+
+```{python}
+#| label: fig-kiwis
+#| fig-cap: Performance of the algorithms in the *kiwis and dogs* problem
+#| fig-subcap: 
+#|  - "Graphic comparison"
+#|  - "Exact values"
+#| echo: false
+plot_kiwis("../out/kiwis_dogs/kiwis_dogs.log","")
+```
+```{python}
+#| label: fig-nqueens
+#| fig-cap: Performance of the algorithms in the *n-queens iterative repair* problem
+#| fig-subcap: 
+#|  - "Graphic comparison (seed-averaged values)"
+#|  - "Seed-averaged values"
+#| echo: false
+plot_nqueens('../out/nqueens/nqueens.log')
+```
+
+```{python}
+#| label: fig-pacman-bfs
+#| fig-cap: Performance of the tool's BFS in the *pacman* problem
+#| fig-subcap: 
+#|  - Tree version
+#|  - Graph version
+#| echo: false
+
+plot_pacman("../out/pacman/hlog-tree-bfs/","hlog","tree","bfs",)
+plot_pacman("../out/pacman/hlog-graph-bfs/","hlog","graph","bfs",)
+```
+```{python}
+#| label: fig-pacman-ucs
+#| fig-cap: Performance of the tool's UCS in the *pacman* problem
+#| fig-subcap: 
+#|  - Tree version
+#|  - Graph version
+#| echo: false
+plot_pacman("../out/pacman/hlog-tree-ucs/","hlog","tree","ucs",)
+plot_pacman("../out/pacman/hlog-graph-ucs/","hlog","graph","ucs",)
+```
+```{python}
+#| label: fig-pacman-astar-tree
+#| fig-cap: Performance of the tool's tree A* in the *pacman* problem
+#| fig-subcap: 
+#|  - Tree A* with Manhattan heuristic
+#|  - Tree A* with Euclidean heuristic
+#| echo: false
+plot_pacman("../out/pacman/hlog-tree-astar-Manhattan/","hlog","tree","astar","Manhattan")
+plot_pacman("../out/pacman/hlog-tree-astar-Euclidean/","hlog","tree","astar","Euclidean")
+```
+```{python}
+#| label: fig-pacman-astar-graph
+#| fig-cap: Performance of the tool's graph A* in the *pacman* problem
+#| fig-subcap: 
+#|  - Graph A* with Manhattan heuristic
+#|  - Graph A* with Euclidean heuristic
+#| echo: false
+plot_pacman("../out/pacman/hlog-graph-astar-Manhattan/","hlog","graph","astar","Manhattan")
+plot_pacman("../out/pacman/hlog-graph-astar-Euclidean/","hlog","graph","astar","Euclidean")
+```
+```{python}
+#| label: fig-pacman-my-ids
+#| fig-cap: Performance of our IDS implementation in the *pacman* problem
+#| echo: false
+plot_pacman("../out/pacman/my-tree-ids/","my","tree","ids",)
+```
+```{python}
+#| label: fig-pacman-my-astar-tree
+#| fig-cap: Performance of our tree A* implementation in the *pacman* problem
+#| fig-subcap: 
+#|  - Tree A* with Manhattan heuristic
+#|  - Tree A* with Euclidean heuristic
+#| echo: false
+plot_pacman("../out/pacman/my-tree-astar-Manhattan/","my","tree","astar","Manhattan")
+plot_pacman("../out/pacman/my-tree-astar-Euclidean/","my","tree","astar","Euclidean")
+```
+```{python}
+#| label: fig-pacman-my-astar-graph
+#| fig-cap: Performance of our graph A* implementation in the *pacman* problem
+#| fig-subcap: 
+#|  - Graph A* with Manhattan heuristic
+#|  - Graph A* with Euclidean heuristic
+#| echo: false
+plot_pacman("../out/pacman/my-graph-astar-Manhattan/","my","graph","astar","Manhattan")
+plot_pacman("../out/pacman/my-graph-astar-Euclidean/","my","graph","astar","Euclidean")
+```

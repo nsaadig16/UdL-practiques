@@ -1,0 +1,217 @@
+---
+title: "IA Assignment 2"
+author: 
+    - Naïm Saadi Gallego
+    - Eduard Térmens Botanch
+bibliography: references.bibtex
+biblio-style: ieee
+header-includes:
+    - "\\DeclareUnicodeCharacter{03B1}{\\ensuremath{\\alpha}}"
+---
+
+## Decision Trees
+
+For this implementation, we created an iterative tree building algorithm using a stack. We also implemented categorical values as subsets.
+
+We implemented **cost-complexity pruning**[@prune] to reduce overfitting. The pruning method compares the error increase from converting a node to a leaf against the `prune_threshold` parameter. We also use the `beta` parameter to require a minimum information gain before making a split. We tested different combinations as shown in @fig-decision-tree. We observed that setting `beta` to 0 gave us the best results.
+
+```{python}
+#| echo: false
+#| label: fig-decision-tree
+#| fig-pos: H
+#| fig-cap: "Mean accuracy by beta prune_threshold and scoref in the iris dataset"
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.rcParams.update({
+    'font.size': 9,
+    'axes.titlesize': 10,
+    'axes.labelsize': 9,
+    'xtick.labelsize': 8,
+    'ytick.labelsize': 8,
+    'legend.fontsize': 8
+})
+
+# Read CSV (supports optional scoref column; defaults to 'gini' if absent)
+data = {}
+with open('../out/decision_tree.csv','r') as f:
+    lines = f.readlines()
+    lines = lines[1:]
+
+for l in lines:
+    parts = l.strip().split(",")
+    if len(parts) == 5:
+        scoref = parts[1].strip()
+        beta = float(parts[2])
+        prune_threshold = float(parts[3])
+        score = float(parts[4])
+    else:
+        scoref = "gini"
+        beta = float(parts[1])
+        prune_threshold = float(parts[2])
+        score = float(parts[3])
+    key = (scoref, beta, prune_threshold)
+    data.setdefault(key, []).append(score)
+
+scorefs = sorted(set(k[0] for k in data.keys()))
+betas = sorted(set(k[1] for k in data.keys()))
+prune_thresholds = sorted(set(k[2] for k in data.keys()))
+
+nrows = len(scorefs)
+fig, axes = plt.subplots(nrows, 1, figsize=(8, 3 * nrows), sharex=True)
+axes = np.atleast_1d(axes)
+
+best_mean, best_scoref, best_beta, best_prune = 0, None, 0, 0
+
+for idx, scoref in enumerate(scorefs):
+    ax = axes[idx]
+    for pt in prune_thresholds:
+        means = []
+        for b in betas:
+            scores = data.get((scoref, b, pt), [])
+            if scores:
+                mean_score = float(np.mean(scores))
+                means.append(mean_score)
+                if mean_score > best_mean:
+                    best_mean, best_scoref, best_beta, best_prune = mean_score, scoref, b, pt
+            else:
+                means.append(np.nan)
+        ax.plot(betas, means, marker='o', label=f'PT={pt}')
+    ax.set_title(f'scoref = {scoref}')
+    ax.set_ylabel('Mean accuracy')
+    ax.grid(True, alpha=0.3)
+    ax.legend(title='prune_threshold')
+
+axes[-1].set_xlabel('beta')
+axes[-1].set_xticks(betas)
+axes[-1].set_xticklabels(betas, rotation=45)
+
+plt.tight_layout()
+plt.show()
+```
+
+The best hyperparameter combination found was score function `{python} f"{best_scoref}"`, $\beta$ = `{python} f"{best_beta}"`, prune threshold = `{python} f"{best_prune}"`, achieving a mean score of `{python} f"{best_mean*100:.2f}%"`.
+
+
+## Naive Bayes
+
+For this implementation, we decided on tokenizing the message by searching if it contained some features like currency symbols, phone numbers[@phone],
+ *urls* or all-caps words. We also check if any of the words are common english stopwords[@stopwords]. After that, we return the words of the message
+ in lowercase and the features.
+
+We first struggled at understanding what data from the training set we had to store, but with the help of some sources[@bayes], we finally decided on storing the essential: the
+times a feature appears in a document (for each class), the total of features that are spam, the total features that are spam and the prior probabilites for each class.
+
+We then started trying different parameters, adn the one that had the biggest impact was the **assumed probability**, which we started tweaking with different values as shown in @fig-histogram.
+
+```{python}
+#| echo: false
+#| label: fig-histogram
+#| fig-pos: H
+#| fig-cap: "Score across 1000 iterations for different assumed probabilities"
+
+import matplotlib.pyplot as plt
+import numpy as np
+
+plt.rcParams.update({
+    'font.size': 9,
+    'axes.titlesize': 10,
+    'axes.labelsize': 9,
+    'xtick.labelsize': 8,
+    'ytick.labelsize': 8,
+    'legend.fontsize': 8
+})
+
+# Read CSV
+iterations_data = {0.25: [], 0.5: [], 0.75: [], 1.0: []}
+scores_data = {0.25: [], 0.5: [], 0.75: [], 1.0: []}
+
+with open('../out/bayesian.csv','r') as f:
+    lines = f.readlines()
+    lines = lines[1:]
+    
+for l in lines:
+    parts = l.split(",")
+    iteration = int(parts[0].strip())
+    assumed_prob = float(parts[1].strip())
+    score = float(parts[2].strip())
+    
+    iterations_data[assumed_prob].append(iteration)
+    scores_data[assumed_prob].append(score)
+
+fig, axes = plt.subplots(2, 2, figsize=(12, 6))
+assumed_probs = [0.25, 0.5, 0.75, 1.0]
+colors = ['steelblue', 'coral', 'seagreen', 'mediumpurple']
+
+best_mean, best_median, best_ap = 0, 0, 0
+
+for idx, (assumed_prob, color) in enumerate(zip(assumed_probs, colors)):
+    ax = axes[idx // 2, idx % 2]
+    scores = scores_data[assumed_prob]
+    
+    ax.hist(scores, bins=20, alpha=0.7, edgecolor='black', color=color)
+    
+    # Add mean and median lines
+    mean_score = np.mean(scores)
+    median_score = np.median(scores)
+    if mean_score > best_mean and median_score > best_median:
+        best_mean, best_median, best_ap = mean_score, median_score, assumed_prob
+    ax.axvline(mean_score, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_score:.4f}')
+    ax.axvline(median_score, color='green', linestyle=':', linewidth=2, label=f'Median: {median_score:.4f}')
+    
+    ax.set_xlabel("Score")
+    ax.set_ylabel("Frequency")
+    ax.set_title(f"Assumed Probability: {assumed_prob}")
+    ax.grid(True, alpha=0.3, axis='y')
+    ax.legend()
+
+plt.tight_layout()
+plt.show()
+```
+
+We overall have very positive scores, being an assumed probability of `{python} f"{int(best_ap*100)}%"` the best with a mean of `{python} f"{best_mean*100:.2f}%"` and a median of `{python} f"{best_median*100:.2f}%"`.
+
+{{< pagebreak >}}
+
+## K-means
+
+### Design choices and problems found
+
+For this implementation, we decided to create a class called `CentroidManager`, which generates the starting centroids and is also used to compute the positions of the new centroids. We also used the `rich` module to debug our code and to show the output.
+
+A critical bug that we had was storing the closest centroid but not the closest distance, just the last one computed. That caused the total distance to increase with the centroids, something mathematically impossible.
+
+### Results and the elbow method
+
+As we can see in @fig-graph, the graph shows the total distance decreasing when we increase the value for $k$, having more centroids and clearer data. We decided to use the **squared euclidean** metric for its efficiency (since it doesn't need to compute the square root). It was also useful to use the *elbow method*.
+
+The *elbow method*[@elbow] suggests that, if we plot $k$ vs WCSS *(Within-Cluster Sum of Squares)*, there is a point where increasing the value for $k$ doesn't have a meaningful impact, which can lead to **overfitting**. As we can see in @fig-graph, at $k=5$ the distance decreases very slowly, being this a good value for $k$. It is also important to note that $k=5$ is a *local optimum*.
+
+```{python}
+#| echo: false
+#| label: fig-graph
+#| fig-pos: H
+#| fig-cap: "Total distance depending on $k$"
+import matplotlib.pyplot as plt
+
+k = []
+distance = []
+
+with open('../out/clustering.csv','r') as f:
+    lines = f.readlines()
+    lines = lines[1:]
+for l in lines:
+    k.append(int(l.split(",")[0].strip()))
+    distance.append(float(l.split(",")[1].strip()))
+
+plt.plot(k, distance, marker="o")
+plt.xlabel("k")
+plt.ylabel("Total distance (squared euclidean)")
+plt.title("")
+plt.grid(True)
+plt.xticks(k, rotation=45) 
+plt.show()
+
+```
+

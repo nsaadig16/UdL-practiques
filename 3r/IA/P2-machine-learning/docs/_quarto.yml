@@ -1,0 +1,24 @@
+project:
+  type: default
+
+format:
+  pdf:
+    pdf-engine: pdflatex
+    documentclass: article
+    output-dir: ../
+    output-file: report.pdf
+    mainfont: "Liberation Serif"
+    monofont: "Liberation Mono"
+    fontsize: 11pt
+    geometry: "margin=2.5cm"
+    toc: false
+    number-sections: false
+    colorlinks: true
+    linkcolor: blue
+    urlcolor: blue
+    fig-pos: "H"
+    cite-method: biblatex
+
+
+
+

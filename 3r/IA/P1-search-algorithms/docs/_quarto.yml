@@ -1,0 +1,30 @@
+format:
+  pdf:
+    pdf-engine: pdflatex
+    documentclass: report
+    header-includes:
+      - |
+        \usepackage{graphicx}
+    output-dir: ../
+    output-file: report.pdf
+    mainfont: "Liberation Serif"
+    monofont: "Liberation Mono"
+    fontsize: 11pt
+    geometry: "margin=2.5cm"
+    toc: true
+    toc-depth: 2
+    number-sections: false
+    colorlinks: true
+    linkcolor: blue
+    urlcolor: blue
+    fig-pos: "H"
+
+title: "First Assignment"
+author:
+  - name: "Naïm Saadi Gallego"
+    mail: "nsg9@alumnes.udl.cat"
+  - name: "Eduard Térmens Botanch"
+    mail: "etb8@alumnes.udl.cat"
+
+date: "November 2, 2025"
+lang: "en"
