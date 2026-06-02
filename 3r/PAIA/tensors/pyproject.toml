@@ -1,0 +1,12 @@
+[project]
+name = "tensors"
+version = "0.1.0"
+description = "Learning about tensors"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.10.9",
+    "numpy>=2.4.4",
+    "torch>=2.11.0",
+    "torchvision>=0.26.0",
+]

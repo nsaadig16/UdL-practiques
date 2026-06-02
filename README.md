@@ -25,22 +25,22 @@
 │   │   └── P1-Pipes_senyals
 │   └── xarxes
 │       └── P1-RTP_RTSP
-└── 3r
-    ├── enginyeria-del-programari
-    │   └── PruebasUnitarias
-    ├── IA
-    │   ├── dectrees
-    │   ├── hlogedu-search
-    │   ├── k-means
-    │   ├── P1-search-algorithms
-    │   └── P2-machine-learning
-    └── sistemes-concurrents-i-paral.lels
-        └── P1-sudoku
-    │   ├── dectrees
-    │   ├── hlogedu-search
-    │   ├── k-means
-    │   ├── P1-search-algorithms
-    │   └── P2-machine-learning
-    └── sistemes-concurrents-i-paral.lels
-        └── P1-sudoku
+├── 3r
+│   ├── ARL
+│   │   └── prac1
+│   ├── EdP
+│   │   └── PruebasUnitarias
+│   ├── IA
+│   │   ├── dectrees
+│   │   ├── hlogedu-search
+│   │   ├── k-means
+│   │   ├── P1-search-algorithms
+│   │   └── P2-machine-learning
+│   ├── PAIA
+│   │   ├── sat-solver
+│   │   ├── sudoku-sat
+│   │   └── tensors
+│   └── SCP
+│       └── P1-sudoku
+└──
 ```

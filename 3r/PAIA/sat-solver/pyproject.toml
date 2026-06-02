@@ -1,0 +1,10 @@
+[project]
+name = "pensat"
+version = "0.1.0"
+description = "PENSAT is a Local Search SAT Solver"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "matplotlib>=3.10.8",
+    "networkx>=3.6.1",
+]
